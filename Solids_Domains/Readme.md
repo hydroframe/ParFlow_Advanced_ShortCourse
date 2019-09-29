@@ -86,37 +86,32 @@ One of the branches of ParFlow that can be found in the `nbengdahl/parflow` fork
 
 We'll focus on using `pfpatchysolid` and building solid objects with it centers around defining the top surface elevations, the bottom surface elevations, and a mask that identifies active and inactive regions. A typical mask file is a gridded file (pfb) where active cells get a value of 1 and inactive cells are zero but `pfpatchysolid` also lets you write different numbers to the mask to define patches, so I call this an "enhanced mask." In the project folder for this section of the course you'll find a folder called "Snoopy" with two tcl scripts, pfbs for the *top and bottom elevations* and two mask files: `Snoopy_Mask.pfb` and `Snoopy_Enhanced_Mask.pfb`. Go ahead and open both in Paraview and the choice of file name will make a lot of sense. You'll see them as 2-d datasets and the difference is that the enhanced mask has more numbers in it (not just 0 and 1). The tool will create patches at the faces where an active cell (value 1) touches these numbers and will also break these patches up further according to the direction they are facing if you tell it to. Let's look at a comparative example. Create a new PFTCL file and add the "import package" block at the top so we can use pftools; we don't need to run this model yet, we just want to look at the domain being created.
 
-** -------- Note to self: need this in a block quote or something -------- **
-The manual might not show this yet so the entry for pfpatchysolid is:
-\item{\begin{verbatim}pfpatchysolid -top topdata -bot botdata -msk emaskdata [optional args] \end{verbatim}}
-Creates a solid file with complex upper and lower surfaces from a top surface elevation dataset (topdata), a bottom elevation dataset (botdata), and an enhanced mask dataset (emaskdata) all of which must be passed as handles to 2-d datasets that share a common size and origin. The solid is built as the volume between the top and bottom surfaces using the mask to deactivate other regions. The ``enhanced mask" used here is a gridded dataset containing integers where all
-active cells have values of one but inactive cells may be given a positive integer value that identifies
-a patch along the model edge or the values may be zero. Any mask cell with value 0 is omitted from the active domain and \textit{is not} written to a patch.
-If an active cell is adjacent to a non-zero mask cell, the face between the active and inactive cell is assigned to the
-patch with the integer value of the adjacent inactive cell. Bottom and Top patches are always written for every active cell and the West, East, South, and North
-edges are written automatically anytime active cells touch the edges of the input dataset(s). Up to 30 user defined patches can be specified using arbitrary integer values that are \textit{greater than} 1.
-Note that the -msk flag may be omitted and doing so will make every cell active.
+> **_The manual might not show this yet so the entry for pfpatchysolid is:_** 
+>
+> `pfpatchysolid -top topdata -bot botdata -msk emaskdata [optional args] `
+>
+> Creates a solid file with complex upper and lower surfaces from a top surface elevation dataset (topdata), a bottom elevation dataset (botdata), and an enhanced mask dataset (emaskdata) all of which must be passed as handles to 2-d datasets that share a common size and origin. The solid is built as the volume between the top and bottom surfaces using the mask to deactivate other regions. The "enhanced mask" used here is a gridded dataset containing integers where all active cells have values of one but inactive cells may be given a positive integer value that identifies a patch along the model edge or the values may be zero. Any mask cell with value 0 is omitted from the active domain and *is not* written to a patch.
+> If an active cell is adjacent to a non-zero mask cell, the face between the active and inactive cell is assigned to the patch with the integer value of the adjacent inactive cell. Bottom and Top patches are always written for every active cell and the West, East, South, and North edges are written automatically anytime active cells touch the edges of the input dataset(s). Up to 30 user defined patches can be specified using arbitrary integer values that are *greater than* 1.
+> Note that the -msk flag may be omitted and doing so will make every cell active.
 
-The -top and -bot flags, and -msk if it is used, MUST
-each be followed by the handle for the relevant dataset. Optional argument flag-name pairs include:
-\begin{itemize}
-\item{-pfsol} <file name>.pfsol  (or -pfsolb <file name>.pfsolb)
-\item{-vtk} <file name>.vtk
-\item{-sub}
-\end{itemize}
+> The -top and -bot flags, and -msk if it is used, MUST each be followed by the handle for the relevant dataset. Optional argument flag-name pairs include:
+>
+> `-pfsol <file name>.pfsol  (or -pfsolb <file name>.pfsolb)`
 
-where <file name> is replaced by the desired text string. The -pfsolb option creates a compact binary solid file; pfsolb cannot currently be read directly by ParFlow but it can be converted with \textit{pfsolidfmtconvert} and full support is under development. If -pfsol (or -pfsolb) is not specified the
-default name "SolidFile.pfsol" will be used. If -vtk is omitted, no vtk file will be created. The vtk attributes will contain mean patch elevations and patch IDs from the enhanced mask. Edge patch IDs are shown as negative values in the vtk.
-The patchysolid tool also outputs the list of the patch names in the order they are written, which can be directly copied into a ParFlow TCL script for the list of patch names.
+> `-vtk <file name>.vtk`
 
-Assuming \$Msk, \$Top, and \$Bot are valid dataset handles from pfload, two valid examples are:
-\begin{display}
-\begin{verbatim}
-pfpatchysolid -msk $Msk -top $Top -bot $Bot -pfsol "MySolid.pfsol" -vtk "MySolid.vtk"
-pfpatchysolid -bot $Bot -top $Top -vtk "MySolid.vtk" -sub
-\end{verbatim}
-\end{display}
-Note that all flag-name pairs may be specified in any order for this tool as long as the required argument immediately follows the flag. To use with a terrain following grid, you will need to subtract the surface elevations from the top and bottom datasets (this makes the top flat) then add back in the total thickness of your grid, which can be done using ``pfcelldiff" and ``pfcellsumconst".
+> `-sub`
+>
+> where <file name> is replaced by the desired text string. The -pfsolb option creates a compact binary solid file; pfsolb cannot currently be read directly by ParFlow but it can be converted with `pfsolidfmtconvert` and full support is under development. If -pfsol (or -pfsolb) is not specified the default name "SolidFile.pfsol" will be used. If -vtk is omitted, no vtk file will be created. The vtk attributes will contain mean patch elevations and patch IDs from the enhanced mask. Edge patch IDs are shown as negative values in the vtk.
+> The patchysolid tool also outputs the list of the patch names in the order they are written, which can be directly copied into a ParFlow TCL script for the list of patch names.
+>
+> Assuming Msk, Top, and Bot are valid dataset handles from pfload, two valid examples are:
+>
+> `pfpatchysolid -msk $Msk -top $Top -bot $Bot -pfsol "MySolid.pfsol" -vtk "MySolid.vtk"`
+>   
+> `pfpatchysolid -bot $Bot -top $Top -vtk "MySolid.vtk" -sub`
+>
+> Note that all flag-name pairs may be specified in any order for this tool as long as the required argument immediately follows the flag. To use with a terrain following grid, you will need to subtract the surface elevations from the top and bottom datasets (this makes the top flat) then add back in the total thickness of your grid, which can be done using "pfcelldiff" and "pfcellsumconst".
 
 OK, now back to the task at hand. What we'll do next is create two solid files, one for each kind of mask, and VTKs for each so we can look at them. To do so, you need to load in the `-top`, `-bot`, and `-msk` datasets with `pfload` then  define the file names to be what you'd like. Add both to out new tcl scrip and run the script. Load both of the VTK objects into Paraview and let's compare them (note that the VTK file will look the same whether or not -sub is used, so pay attention to the patch write list). Two variables are written to these VTK files (Elev and Patch) but we want to look at `Patch` so select that for the standard mask. You'll find several values: 0, -1, -2, -4 etc... for the "ignored" region, the bottom, the top, and the "north" edge (see the description above). Every patch on the vertical sides of the solid have value 0 because the "Snoopy_Mask.pfb" has zeros there, except for the one place it intersects the edge of the grid where a North patch (value -4) was written. If you switch to the enhanced mask, "Snoopy_Mask.pfb", you'll see quite a few more patches.
 
@@ -148,20 +143,28 @@ Our second option is to use `pfpatchysolid` recognizing that it requires a PFB t
 
 First, let's build the "real-world" version of the active domain solid to see what this looks like. We'll load in the top surface and use pftools to subtract out the thickness to make the bottom. Since this is pftools these commands will go into a TCL script and the operations for this go something like:
 
->set DEM [pfload -pfb "Sabino_DEM.pfb"]
->set Mask [pfload -pfb "Sabino_Mask.pfb"]
->set DMsk [pfload -pfb "Sabino_Dummy_Mask.pfb"]
->
->set Bot [pfcellsumconst  $DEM -500 $DMsk]
->pfpatchysolid -top $DEM -bot $Bot -pfsol "sabino_mask_og.pfsol" -msk $Mask -vtk "sabino_mask_og.vtk"
+> `set DEM [pfload -pfb "Sabino_DEM.pfb"]`
 
-Where I've used the "_og" identifier so we remember that this is not setup for a **TFG** just yet. The `pfcellsumconst` command requires a mask (in my experience it gives better results when you use a dummy mask that covers the entire domain) and we simply defined a new surface 500m below the top. To build the **TFG** the approach is similar but we need to transform the top and bottom surfaces. In addition to those commands above, we need the following:
+> `set Mask [pfload -pfb "Sabino_Mask.pfb"]`
 
->set Top [pfcelldiff $DEM $DEM $DMask]
->set Bot [pfcelldiff $Bot $DEM $DMask]
->set Top [pfcellsumconst  $Top 500 $DMsk]
->set Bot [pfcellsumconst  $Bot 500 $DMsk]
->pfpatchysolid -top $Top -bot $Bot -pfsol "sabino_mask_tfg.pfsol" -msk $Mask -vtk "sabino_mask_tfg.vtk"
+> `set DMsk [pfload -pfb "Sabino_Dummy_Mask.pfb"]`
+
+> 
+> `set Bot [pfcellsumconst  $DEM -500 $DMsk]`
+
+> `pfpatchysolid -top $DEM -bot $Bot -pfsol "sabino_mask_og.pfsol" -msk $Mask -vtk "sabino_mask_og.vtk"`
+
+Where I've used the "og" identifier so we remember that this is not setup for a **TFG** just yet. The `pfcellsumconst` command requires a mask (in my experience it gives better results when you use a dummy mask that covers the entire domain) and we simply defined a new surface 500m below the top. To build the **TFG** the approach is similar but we need to transform the top and bottom surfaces. In addition to those commands above, we need the following:
+
+> `set Top [pfcelldiff $DEM $DEM $DMask]`
+
+> `set Bot [pfcelldiff $Bot $DEM $DMask]`
+
+> `set Top [pfcellsumconst  $Top 500 $DMsk]`
+
+> `set Bot [pfcellsumconst  $Bot 500 $DMsk]`
+
+> `pfpatchysolid -top $Top -bot $Bot -pfsol "sabino_mask_tfg.pfsol" -msk $Mask -vtk "sabino_mask_tfg.vtk"`
 
 which will generate the final solid and tell you the patches that were written in the order that they were written. There are a few other ways you could get the same result but I'll leave that to you to explore.
 
