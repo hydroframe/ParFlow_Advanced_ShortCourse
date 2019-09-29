@@ -128,6 +128,45 @@ The modification for all of these files for a terrain following grid is similar 
 The included `Snoopy_TFG.tcl` script is the reference for the **TFG** and it is an "equivalent" **TFG** construction of the `Snoopy_OG.tcl` domain. However, try to build your own `My_Snoopy_TFG.tcl` from `Snoopy_OG.tcl` instead of just running the **TFG** version.
 
 ## 5. Building the solid mask for our Sabino Canyon domain
-Our last item of business for this session is to build the solid file for the Sabino Canyon watershed that you'll be using for the remainder of the short course.  
+Our last item of business for this session is to build the solid file for the Sabino Canyon watershed. This example involves a **TFG** and three solid files: one for the active domain and two to delineate the permeability in two regions, with the remainder filled in as a background type. This will be a slightly simplified version of the actual site geology where we'll assume each region fully penetrates the domain, one region goes half way down.
 
-The details of the watershed will provided in class and we'll walk through the sizing and selection of a reasonable grid for this domain.
+The files you need to build this geometry are `Sabino_Dummy_Mask.pfb`, `Sabino_Mask.pfb`, `Sabino_Basin_Mask.pfb`, `Sabino_MBGeo_Mask.pfb` and `Sabino_DEM.pfb`. The `Sabino_Mask.pfb` file is the mask for the active domain, the "basin" and "mbgeo" masks are for the basin fill and mountain block regions and the `Sabino_Dummy_Mask.pfb` is just a 2d PFB file the same size as the DEM but filled with ones (a file like this can be helpful when usinging pftools).
+
+Go ahead and make a copy of a working **TFG** based tcl and call it `SabinoTFG.tcl`. The dimensions of the computational grid are: dx=90.0, dy=90.0, dz=100.0, nx=246, ny=178, nz=5, and the coordinate origin is x0=y0=z0=0.0. Now let's build our active domain solid.
+
+### Option 1 - A simple mask for a TFG
+First, we'll use the `pfmask-to-pfsol` utility to build the solid. You can look at the online documentation on GitHub (within the pftools folder) for the complete syntax but the command we'll use is:
+
+>pfmask-to-pfsol --mask Sabino_Mask.pfb --vtk sabino_masker.vtk --pfsol sabino_masker.pfsol --z-top 500.0 --z-bottom 0.0
+
+We'll explain what each argument does in class. Note that this is entered at the command line, NOT in a tcl script. When that runs you'll see a few outputs print to the screen but what is important to note is that the top patch is written first then the bottom and side patches. If you load the VTK, you'll see where these patches have been written.
+
+This command is very handy for simple terrain following grids where uniform layers are involved because the constant top and bottom elevations are specified. However, it cannot handle irregular surfaces where the thickness changes spatially.
+
+### Option 2 - The longer but more flexible way
+Our second option is to use `pfpatchysolid` recognizing that it requires a PFB to define the top and bottom of the solid, but these don't have to be flat. What I typically do is create my solid files as 3d objects with their actual (real world) elevations, then convert those into an equivalent **TFG** solid. The way to do that is to subtract the DEM of the surface from every top and bottom surface, then add back in the total layer thickness. This is a little more work but it gives you a lot more freedom to define complex objects.
+
+First, let's build the "real-world" version of the active domain solid to see what this looks like. We'll load in the top surface and use pftools to subtract out the thickness to make the bottom. Since this is pftools these commands will go into a TCL script and the operations for this go something like:
+
+>set DEM [pfload -pfb "Sabino_DEM.pfb"]
+>set Mask [pfload -pfb "Sabino_Mask.pfb"]
+>set DMsk [pfload -pfb "Sabino_Dummy_Mask.pfb"]
+>
+>set Bot [pfcellsumconst  $DEM -500 $DMsk]
+>pfpatchysolid -top $DEM -bot $Bot -pfsol "sabino_mask_og.pfsol" -msk $Mask -vtk "sabino_mask_og.vtk"
+
+Where I've used the "_og" identifier so we remember that this is not setup for a **TFG** just yet. The `pfcellsumconst` command requires a mask (in my experience it gives better results when you use a dummy mask that covers the entire domain) and we simply defined a new surface 500m below the top. To build the **TFG** the approach is similar but we need to transform the top and bottom surfaces. In addition to those commands above, we need the following:
+
+>set Top [pfcelldiff $DEM $DEM $DMask]
+>set Bot [pfcelldiff $Bot $DEM $DMask]
+>set Top [pfcellsumconst  $Top 500 $DMsk]
+>set Bot [pfcellsumconst  $Bot 500 $DMsk]
+>pfpatchysolid -top $Top -bot $Bot -pfsol "sabino_mask_tfg.pfsol" -msk $Mask -vtk "sabino_mask_tfg.vtk"
+
+which will generate the final solid and tell you the patches that were written in the order that they were written. There are a few other ways you could get the same result but I'll leave that to you to explore.
+
+### Comparison
+The main difference you'll see between these two options is the patches that are written and the size of the files. Since `pfpatchysolid` is designed for complex terrain, it creates top and bottom triangles for every cell to preserve the resolution of the terrain in the PFB. Since `pfmask-to-pfsol` is designed for flat solids only, it can take advantage of an algorithm that significantly reduces the number of interior points in the solid domain, while preserving the resolution along the edge, because we can make big flat triangles. Open both VTK files in Paraview of Visit and look at the "Wireframe" view and you'll immediately see the difference. If you have flat layers in an **OG** or layers that are uniform thickness in a **TFG** then `pfmask-to-pfsol` is probably your best choice. Otherwise `pfpatchysolid` can be used for any arbitrary solid and grid combination, but the files will be larger. To help reduce this size we are adding support for a *binary* solid file but this is not yet fully implemented.
+
+### The rest of the solids
+The two solids left to build are the "basin fill" and "mountain block" units, which use the same top surface (the DEM) but switch off different sides of the domain. Build each but for the mountain block only make it cover the upper 250m. Once you have all the solids built, define permeability in each differently so you can see them, take a single time step forward, and look at the permeability field to make sure everything is in the right place. You'll need to define the slopes but the built in pftool `pfslopex` can be used for that. If you get stuck, a completed example of this is provided in the `Sabino_TFG.tcl` script.
