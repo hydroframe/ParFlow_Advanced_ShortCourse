@@ -1,5 +1,5 @@
 #Overland Test Outputs
-#Topographic_Processing/Overland_Tets/Outputs/
+Topographic_Processing/Overland_Tets/*.out*
 
 # History files
 .Rhistory
