@@ -1,6 +1,6 @@
 #Overland Test Outputs
-Topographic_Processing/Overland_Tets/*.out*
-Topographic_Processing/Overland_Tets/*.pfidb
+Topographic_Processing/Overland_Tests/*.out*
+Topographic_Processing/Overland_Tests/*.pfidb
 
 # History files
 .Rhistory
