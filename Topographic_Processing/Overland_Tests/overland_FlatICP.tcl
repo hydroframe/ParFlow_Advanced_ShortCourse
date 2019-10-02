@@ -303,6 +303,7 @@ pfset Geom.icsource.ICPressure.RefPatch                   z-upper
 #-----------------------------------------------------------------------------
 #original approach from K&M AWR 2006
 #-----------------------------------------------------------------------------
+cd ./Outputs
 pfset Patch.z-upper.BCPressure.Type		      OverlandFlow
 pfset Solver.Nonlinear.UseJacobian          False
 pfset Solver.Linear.Preconditioner.PCMatrixType PFSymmetric
