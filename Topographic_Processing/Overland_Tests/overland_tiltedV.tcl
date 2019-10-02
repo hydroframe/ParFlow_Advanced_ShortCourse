@@ -284,6 +284,7 @@ pfset Solver.Nonlinear.StepTol				                   1e-20
 pfset Solver.Nonlinear.Globalization                     LineSearch
 pfset Solver.Linear.KrylovDimension                      50
 pfset Solver.Linear.MaxRestart                           2
+pfset Solver.OverlandKinematic.Epsilon                  1E-5
 
 pfset Solver.Linear.Preconditioner                       PFMG
 pfset Solver.PrintSubsurf				                         False
@@ -296,8 +297,6 @@ pfset Solver.WriteSiloSlopes                            False
 
 pfset Solver.WriteSiloSaturation                        False
 pfset Solver.WriteSiloConcentration                     False
-
-pfset Solver.OverlandDiffusive.Epsilon                  1E-5
 
 #---------------------------------------------------------
 # Initial conditions: water pressure
@@ -312,12 +311,31 @@ pfset Geom.domain.ICPressure.RefGeom                    domain
 pfset Geom.domain.ICPressure.RefPatch                   z-upper
 
 #-----------------------------------------------------------------------------
-# Run and Unload the ParFlow output files
+# Oringial formulation with a zero value channel
 #-----------------------------------------------------------------------------
+pfset TopoSlopesX.Type "Constant"
+pfset TopoSlopesX.GeomNames "left right channel"
+pfset TopoSlopesX.Geom.left.Value -0.01
+pfset TopoSlopesX.Geom.right.Value 0.01
+pfset TopoSlopesX.Geom.channel.Value 0.00
+
+pfset TopoSlopesY.Type "Constant"
+pfset TopoSlopesY.GeomNames "domain"
+pfset TopoSlopesY.Geom.domain.Value 0.01
+
+#original approach from K&M AWR 2006
+pfset Patch.z-upper.BCPressure.Type		      OverlandFlow
+pfset Solver.Nonlinear.UseJacobian                       True
+pfset Solver.Linear.Preconditioner.PCMatrixType PFSymmetric
+
+set runname TiltedV_Overland
+puts "##########"
+puts $runname
+pfrun $runname
+pfundist $runname
 
 #-----------------------------------------------------------------------------
-# New diffusive formulations without the zero channel (as compared to the first
-#    tests in overland_tiltedV_KWE.tcl)
+# New kinematic formulations without the zero channel
 # Note: The difference in configuration here is to be consistent with the way
 #   the upwinding is handled for the new and original fomulations.
 #   These two results should be almost identical for the new and old formulations
@@ -332,37 +350,13 @@ pfset TopoSlopesY.Type "Constant"
 pfset TopoSlopesY.GeomNames "domain"
 pfset TopoSlopesY.Geom.domain.Value 0.01
 
-# run with DWE
-pfset Patch.z-upper.BCPressure.Type		      OverlandDiffusive
-pfset Solver.Nonlinear.UseJacobian                       False
-pfset Solver.Linear.Preconditioner.PCMatrixType PFSymmetric
-
-set runname TiltedV_OverlandDif
-puts "##########"
-puts $runname
-pfrun $runname
-pfundist $runname
-
-
-# run with KWE upwinding and analytical jacobian
-pfset Patch.z-upper.BCPressure.Type		      OverlandDiffusive
+# run with KWE upwinding
+pfset Patch.z-upper.BCPressure.Type		      OverlandKinematic
 pfset Solver.Nonlinear.UseJacobian                       True
 pfset Solver.Linear.Preconditioner.PCMatrixType PFSymmetric
 
-set runname TiltedV_OverlandDif
+set runname TiltedV_OverlandKin
 puts "##########"
-puts "Running $runname Jacobian True"
-pfrun $runname
-pfundist $runname
-
-
-# run with KWE upwinding and analytical jacobian and nonsymmetric preconditioner
-pfset Patch.z-upper.BCPressure.Type		      OverlandDiffusive
-pfset Solver.Nonlinear.UseJacobian                       True
-pfset Solver.Linear.Preconditioner.PCMatrixType FullJacobian
-
-set runname TiltedV_OverlandDif
-puts "##########"
-puts "Running $runname Jacobian True Nonsymmetric Preconditioner"
+puts "Running $runname"
 pfrun $runname
 pfundist $runname

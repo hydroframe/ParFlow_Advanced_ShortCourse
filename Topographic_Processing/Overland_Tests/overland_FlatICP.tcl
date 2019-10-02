@@ -303,61 +303,11 @@ pfset Geom.icsource.ICPressure.RefPatch                   z-upper
 #-----------------------------------------------------------------------------
 #original approach from K&M AWR 2006
 #-----------------------------------------------------------------------------
-cd ./Outputs
 pfset Patch.z-upper.BCPressure.Type		      OverlandFlow
 pfset Solver.Nonlinear.UseJacobian          False
 pfset Solver.Linear.Preconditioner.PCMatrixType PFSymmetric
 
 set runname FlatICP_Overland
 puts $runname
-pfrun $runname
-pfundist $runname
-
-
-#-----------------------------------------------------------------------------
-# New kinematic formulation - this should exactly match the original formulation
-#  for this flat test case
-#-----------------------------------------------------------------------------
-pfset Patch.z-upper.BCPressure.Type		      OverlandKinematic
-pfset Solver.Nonlinear.UseJacobian          False
-pfset Solver.Linear.Preconditioner.PCMatrixType PFSymmetric
-set runname FlatICP_OverlandKin
-puts "Running $runname"
-pfrun $runname
-pfundist $runname
-
-
-#-----------------------------------------------------------------------------
-# Diffusive formulation
-#-----------------------------------------------------------------------------
-#run with Jacobian False
-pfset Patch.z-upper.BCPressure.Type		      OverlandDiffusive
-pfset Solver.Nonlinear.UseJacobian                       False
-pfset Solver.Linear.Preconditioner.PCMatrixType PFSymmetric
-
-set runname FlatICP_OverlandDif
-puts "Running $runname"
-pfrun $runname
-pfundist $runname
-
-
-# run with analytical jacobian
-pfset Patch.z-upper.BCPressure.Type		      OverlandDiffusive
-pfset Solver.Nonlinear.UseJacobian                       True
-pfset Solver.Linear.Preconditioner.PCMatrixType PFSymmetric
-
-set runname FlatICP_OverlandDif
-puts "Running $runname Jacobian True"
-pfrun $runname
-pfundist $runname
-
-
-# run with analytical jacobian and nonsymmetric preconditioner
-pfset Patch.z-upper.BCPressure.Type		      OverlandDiffusive
-pfset Solver.Nonlinear.UseJacobian                       True
-pfset Solver.Linear.Preconditioner.PCMatrixType FullJacobian
-
-set runname FlatICP_OverlandDif
-puts "Running $runname Jacobian True Nonsymmetric Preconditioner"
 pfrun $runname
 pfundist $runname
