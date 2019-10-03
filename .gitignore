@@ -2,6 +2,10 @@
 Topographic_Processing/Overland_Tests/*.out*
 Topographic_Processing/Overland_Tests/*.pfidb
 
+#Topographic Processing
+Topographic_Processing/Topographic_Processing/*.out*
+Topographic_Processing/Topographic_Processing/*.pfidb
+
 #Solvers-Scaling
 Solvers-Scaling/*.out*
 Solvers-Scaling/*.pfidb
