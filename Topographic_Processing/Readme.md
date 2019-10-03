@@ -54,3 +54,5 @@ If you have extra time:
 2. Change up the script we used to explore different solver options similar to the ones in the test directory. Look at the kinsol logs to see how the different solver options change performance.
 3. Change the intensity of rainfall and/or slope of the V and see what happens.
 4. Turn the flat case into a sloping slab and change where you start the initial ponded water.
+
+## Exercise 2: Topographic Processing
