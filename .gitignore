@@ -2,6 +2,10 @@
 Topographic_Processing/Overland_Tests/*.out*
 Topographic_Processing/Overland_Tests/*.pfidb
 
+#Solvers-Scaling
+Solvers-Scaling/*.out*
+Solvers-Scaling/*.pfidb
+
 # History files
 .Rhistory
 .Rapp.history
