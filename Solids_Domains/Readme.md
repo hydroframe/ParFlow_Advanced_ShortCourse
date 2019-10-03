@@ -3,6 +3,13 @@
 *by Nick Engdahl*
 *(nick.engdahl@wsu.edu)*
 
+
+## Preliminary: Obtaining the Patchy_Solid branch
+The command to retrieve the branch we need for today is:
+`git clone https://github.com/nbengdahl/parflow.git --branch pf_patchy_solid --single-branch`
+This has soon to be merged set of tools built to help construct complex domains. The rest of the ParFlow installation instructions are exactly as they appear on the blog.
+
+
 ## Overview
 The objective of this exercise is to help you understand the basics of solid files so you can build your own using either the built in PFTool utilities or your own code.
 
