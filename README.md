@@ -6,11 +6,12 @@
 ## Contents
 This repo contains all of the exercises and slides for the short course. Materials for the introductory course are available [Here](https://github.com/hydroframe/ParFlow_Short_Course).
 
-1. Slides: All of the presentation Materials
+1. Slides: All of slides presented in the course
 2. Solids_Domains: Exercises for creating and testing your own solid file domain_input
 3. Solver-Scaling: Exercises for testing different solver configurations and scaling.  
 4. Topographic_Processing: Exercises for processing topography and testing different overland flow boundary conditions.
-5. CLM: Exercises experimenting with clm variables using single column exercises. 
+5. CLM: Exercises experimenting with clm variables using single column exercises.
+6. Additional_Materials: Additional reference slides mentioned in class.
 
 
 ## Instructions for ParFlow-Docker
