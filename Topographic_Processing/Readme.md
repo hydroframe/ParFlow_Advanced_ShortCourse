@@ -56,3 +56,7 @@ If you have extra time:
 4. Turn the flat case into a sloping slab and change where you start the initial ponded water.
 
 ## Exercise 2: Topographic Processing
+For this exercise we will walk through a topographic processing workflow from the Prioirty Flow Repo.  All of  the instructions are in Workflow_Example.Rmd in the Topographic_Processing folder.
+
+**Extra Activities:**
+If you have time at the end you can try running a runoff test using the slopes you create from the topographic processing workflow. For an example of a runoff test you can look at Exercise 2 of the Little Washita folder in the intro to ParFlow course materials (https://github.com/hydroframe/ParFlow_Short_Course)
